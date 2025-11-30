@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☠☠</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* 🎨 CSS: Giao Diện Dark Mode (Hacker Style) */
+        :root {
+            --bg-color: #000000;
+            --text-color: #00ff00;
+            --accent-color: #008000;
+            --font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 🎬 Video Nền Hacker Full Screen (Giữ nguyên) */
+        #background-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -100;
+            transform: translate(-50%, -50%);
+            filter: brightness(0.4) grayscale(0.2); 
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); 
+            z-index: -99;
+        }
+
+        .container {
+            width: 95%; 
+            max-width: 1200px;
+            padding: 20px 10px; 
+            z-index: 1; 
+        }
+
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            text-shadow: 0 0 5px var(--accent-color);
+            margin-bottom: 30px;
+            font-size: 2em;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            margin-bottom: 30px;
+        }
+
+        .media-item { /* Đổi từ .image-item thành .media-item */
+            overflow: hidden;
+            border: 1px solid var(--text-color);
+            position: relative;
+            height: 120px; /* Chiều cao cố định */
+            background-color: #1a1a1a; /* Màu nền khi tải hoặc video/ảnh lỗi */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            font-size: 0.8em;
+            text-align: center;
+        }
+
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: 100%; /* Chiếm toàn bộ chiều cao của media-item */
+            object-fit: cover; /* Đảm bảo nội dung vừa khung mà không bị méo */
+            display: block;
+        }
+
+        /* Icon cho video */
+        .media-item.video::before {
+            content: "▶️"; /* Icon play */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: white;
+            z-index: 10;
+            text-shadow: 0 0 5px black;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around; 
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap; 
+        }
+
+        .controls button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: 2px solid var(--text-color);
+            padding: 8px 15px; 
+            font-family: var(--font-family);
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        #download-zip-btn {
+            background-color: #ff0000;
+            border-color: #ffcc00;
+            color: white;
+            padding: 10px 20px;
+            order: -1; 
+            flex-basis: 100%; 
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        /* 📱 MEDIA QUERY: Tối ưu cho màn hình lớn hơn */
+        @media (min-width: 600px) {
+            #gallery {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+            .media-item {
+                height: 150px;
+            }
+            .controls {
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 50px;
+            }
+            #download-zip-btn {
+                order: 0; 
+                flex-basis: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="background-video">
+        <source src="https://www.w3schools.com/tags/movie.mp4" type="video/mp4"> 
+        Your browser does not support the video tag.
+    </video>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <h1>[ ☠ GALLERY ☠ ]</h1>
+        
+        <div id="gallery">
+            </div>
+
+        <div class="controls">
+            <button id="download-zip-btn">⬇️ DOWNLOAD ⬇️</button>
+            
+            <div class="pagination-controls">
+                <button id="prev-btn">⏮️B4CK</button>
+                <span id="page-info">Page 1/1</span>
+                <button id="next-btn">N3XT ⏭️</button>
+            </div>
+            
+            <div id="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        const allUrls = {{ urls | tojson }};
+
+        const imagesPerPage = 30; 
+        let currentPage = 1;
+        let totalPages = 0;
+        
+        const gallery = document.getElementById('gallery');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageInfo = document.getElementById('page-info');
+        const downloadZipBtn = document.getElementById('download-zip-btn');
+        const statusMessage = document.getElementById('status-message');
+
+        // =========================================================
+        //                 PHẦN XỬ LÝ NÉN ZIP
+        // =========================================================
+        // Logic này cần được cải thiện để chỉ nén ảnh, không nén video.
+        // Hoặc nén video nếu bạn muốn, nhưng kích thước sẽ rất lớn.
+        // Tôi sẽ sửa đổi để chỉ nén ảnh.
+
+        async function fetchMediaAsBlob(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.arrayBuffer(); 
+            } catch (error) {
+                console.error(`Lỗi tải media từ ${url}:`, error);
+                return null;
+            }
+        }
+        
+        downloadZipBtn.addEventListener('click', async () => {
+            if (allUrls.length === 0) {
+                statusMessage.textContent = "[ THÔNG BÁO: KHÔNG CÓ URL NÀO ĐỂ TẢI XUỐNG. ]";
+                return;
+            }
+
+            downloadZipBtn.disabled = true;
+            statusMessage.textContent = "[ BẮT ĐẦU: Đang tải và nén 0 / " + allUrls.length + " media... ]";
+            
+            const zip = new JSZip();
+            let loadedCount = 0;
+            let failedCount = 0;
+            const totalUrls = allUrls.length;
+
+            const fetchPromises = allUrls.map(async (url, index) => {
+                const urlLower = url.toLowerCase();
+                // Chỉ nén ảnh, bỏ qua video để tránh file ZIP quá lớn
+                if (urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg') || 
+                    urlLower.endsWith('.png') || urlLower.endsWith('.gif')) {
+                    
+                    const data = await fetchMediaAsBlob(url);
+                    
+                    if (data) {
+                        const filename = `media_${String(index + 1).padStart(3, '0')}.${urlLower.split('.').pop()}`;
+                        zip.file(filename, data, { binary: true });
+                        loadedCount++;
+                        statusMessage.textContent = `[ TRẠNG THÁI: Đang tải và nén ${loadedCount} / ${totalUrls} media (chỉ ảnh)... ]`;
+                    } else {
+                        failedCount++;
+                    }
+                } else {
+                    // Bỏ qua video khi nén
+                    failedCount++; // Tăng failed count cho các item không được nén
+                }
+            });
+
+            await Promise.all(fetchPromises);
+
+            statusMessage.textContent = `[ TRẠNG THÁI: Đã nén ${loadedCount} ảnh. Bỏ qua ${totalUrls - loadedCount - failedCount} video. Lỗi ${failedCount} item. Đang tạo file ZIP... ]`;
+
+            if (loadedCount > 0) {
+                const content = await zip.generateAsync({ type: "blob" });
+
+                const now = new Date();
+                const filename = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}.zip`;
+                
+                saveAs(content, filename);
+                
+                statusMessage.textContent = `[ THÀNH CÔNG: Đã tạo và tải xuống ${filename} ]`;
+            } else {
+                statusMessage.textContent = "[ LỖI NGHIÊM TRỌNG: KHÔNG THỂ TẢI XUỐNG BẤT KỲ ẢNH NÀO. KIỂM TRA LẠI URL. ]";
+            }
+
+            downloadZipBtn.disabled = false;
+        });
+
+        // =========================================================
+        //                 PHẦN XỬ LÝ PHÂN TRANG (MỚI)
+        // =========================================================
+
+        function displayImages() {
+            if (allUrls.length === 0) {
+                gallery.innerHTML = '<p style="color: red; text-align: center;">[ ERROR: KHÔNG CÓ URL NÀO ĐƯỢC TẢI TỪ SERVER. ]</p>';
+                totalPages = 0;
+                updateControls();
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * imagesPerPage;
+            const endIndex = Math.min(startIndex + imagesPerPage, allUrls.length); 
+            const urlsToDisplay = allUrls.slice(startIndex, endIndex);
+
+            gallery.innerHTML = ''; // Xóa nội dung cũ
+
+            urlsToDisplay.forEach(url => {
+                const div = document.createElement('div');
+                div.className = 'media-item'; // Đổi class từ image-item thành media-item
+
+                const urlLower = url.toLowerCase();
+
+                if (urlLower.endsWith('.mp4') || urlLower.endsWith('.webm') || urlLower.endsWith('.ogg')) {
+                    // Nếu là video
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.autoplay = false; // Video trong lưới không tự động phát
+                    video.loop = true;
+                    video.muted = true; // Luôn tắt tiếng
+                    video.controls = false; // Không hiện controls mặc định
+                    video.setAttribute('playsinline', ''); // Quan trọng cho iOS
+                    
+                    div.classList.add('video'); // Thêm class 'video' để hiện icon play
+                    div.appendChild(video);
+
+                    // Khi click vào video trong lưới, có thể bật/tắt tiếng hoặc mở lớn
+                    div.addEventListener('click', () => {
+                        if (video.paused) {
+                            video.play();
+                            div.classList.remove('video'); // Ẩn icon play khi đang phát
+                        } else {
+                            video.pause();
+                            div.classList.add('video'); // Hiện lại icon play khi tạm dừng
+                        }
+                    });
+
+                } else if (urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg') || 
+                           urlLower.endsWith('.png') || urlLower.endsWith('.gif') || 
+                           urlLower.endsWith('.webp')) {
+                    // Nếu là ảnh
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Media từ URL';
+                    div.classList.add('image');
+                    div.appendChild(img);
+                } else {
+                    // Các loại URL không xác định
+                    div.textContent = '[ Dữ liệu không hỗ trợ hoặc lỗi URL ]';
+                    div.style.backgroundColor = '#440000'; // Màu đỏ cho lỗi
+                }
+                gallery.appendChild(div);
+            });
+
+            updateControls();
+        }
+
+        function updateControls() {
+            totalPages = Math.ceil(allUrls.length / imagesPerPage);
+            
+            prevBtn.disabled = currentPage === 1 || totalPages <= 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages <= 1;
+            pageInfo.textContent = `Trang ${currentPage}/${totalPages}`;
+        }
+
+        // --- XỬ LÝ SỰ KIỆN NÚT PHÂN TRANG ---
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayImages();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayImages();
+            }
+        });
+
+        // --- KHỞI TẠO TRANG ---
+        document.addEventListener('DOMContentLoaded', () => {
+            displayImages(); 
+        });
+    </script>
+</body>
+</html>
